@@ -1,0 +1,3 @@
+2012-05-04:
+
+	* Uploaded version 0.9 to github
