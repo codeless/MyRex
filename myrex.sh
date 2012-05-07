@@ -5,7 +5,7 @@
 # Author: Manuel Hiptmair
 # Created in: April - May 2012
 
-PROGRAM_VERSION="0.91"
+PROGRAM_VERSION="0.915"
 PROGRAM_DESCRIPTION="
 NAME
 
@@ -125,7 +125,7 @@ TEMPORARY_DIR=$TMPDIR
 
 
 # Query commandline arguments:
-while getopts f:s:a:e:D:u:p:r opt
+while getopts f:s:a:e:D:u:p:c:r opt
 do
 	case "$opt" in
 		f) 	SQL_FILE="$OPTARG";;
