@@ -5,7 +5,7 @@
 # Author: Manuel Hiptmair
 # Created in: April - May 2012
 
-PROGRAM_VERSION="0.9"
+PROGRAM_VERSION="0.91"
 PROGRAM_DESCRIPTION="
 NAME
 
@@ -104,8 +104,8 @@ usage () {
 }
 
 quit () {
-	echo "Failure: $1"
-	echo "Quitting..."
+	echo "Failure: $1" >&2
+	echo "Quitting..." >&2
 	exit 1
 }
 
