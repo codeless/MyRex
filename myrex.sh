@@ -5,7 +5,7 @@
 # Author: Manuel Hiptmair
 # Created in: April - May 2012
 
-PROGRAM_VERSION="0.915"
+PROGRAM_VERSION="0.92"
 PROGRAM_DESCRIPTION="
 NAME
 
@@ -13,8 +13,7 @@ NAME
 
 USAGE
 
-	myrex [options] -a email-address -D database -u user
-		-p password monitor-id
+	myrex [options] -a email-address -D database -u user monitor-id
 
 DESCRIPTION
 
@@ -45,7 +44,7 @@ OPTIONS
 
 		Send carbon copies of e-mail notification to list
 		of users.
-		Default: empty
+		Default: none
 
 	-e message-file
 
@@ -59,6 +58,12 @@ OPTIONS
 
 		The MySQL-database to use.
 
+	-d mysql-configuration-file
+
+		Individual path of a MySQL configuration file, 
+		if .my.cnf should not get used
+		Default: none
+
 	-u user
 
 		The MySQL user name to use when connecting to the
@@ -67,6 +72,10 @@ OPTIONS
 	-p password
 
 		The password to use when connecting to the MySQL-server.
+		Default: none, which will force MySQL to either use the
+		default configuration file .my.cnf, the passed MySQL
+		configuration file or the environment variable
+		MYSQL_PWD -- in this order!
 
 	-r
 
@@ -86,6 +95,26 @@ ENVIRONMENT VARIABLES
 
 		Used as directory for temporary files instead of /tmp,
 		if set.
+
+	MYSQL_PWD
+
+		Will be used by MySQL if no password has been passed on
+		the commandline and the MySQL configuration file does
+		not exist
+
+FILES
+
+	~/.my.cnf
+
+		Is the default MySQL configuration file and will be
+		accessed by MySQL if no password has been passed
+		through the commandline
+
+RETURN VALUES
+
+	0
+
+		Everything went fine
 
 BUGS
 
@@ -119,13 +148,15 @@ EMAIL_FILE= 		# -e
 MYSQL_DATABASE= 	# -D
 MYSQL_USER= 		# -u
 MYSQL_PASSWORD= 	# -p
+MYSQL_CONFIG_FILE= 	# -d
 MYSQL_OPTION_RAW= 	# -r
+MYSQL_CMD_ARGUMENTS=
 MONITOR_ID=
 TEMPORARY_DIR=$TMPDIR
 
 
 # Query commandline arguments:
-while getopts f:s:a:e:D:u:p:c:r opt
+while getopts f:s:a:e:D:d:u:p:c:r opt
 do
 	case "$opt" in
 		f) 	SQL_FILE="$OPTARG";;
@@ -134,6 +165,7 @@ do
 		c) 	EMAIL_CC="$OPTARG";;
 		e) 	EMAIL_FILE="$OPTARG";;
 		D) 	MYSQL_DATABASE=$OPTARG;;
+		d) 	MYSQL_CONFIG_FILE=$OPTARG;;
 		u) 	MYSQL_USER="$OPTARG";;
 		p) 	MYSQL_PASSWORD="$OPTARG";;
 		r) 	MYSQL_OPTION_RAW="--raw";;
@@ -172,10 +204,19 @@ then
 	quit "No MySQL user passed"
 fi
 
-# MySQL password given?
-if [ "$MYSQL_PASSWORD" = "" ]
+# If MySQL password is given, compile add to argument string
+if [ "$MYSQL_PASSWORD" != "" ]
 then
-	quit "No MySQL password passed"
+	MYSQL_CMD_ARGUMENTS="-p$MYSQL_PASSWORD"
+fi
+
+# If a individual MySQL configuration file is given, compile path
+# into argument string:
+if [ "$MYSQL_CONFIG_FILE" != "" ]
+then
+	# The defaults-file argument has to be passed as
+	# first argument to mysql; otherwise it won't work!
+	MYSQL_CMD_ARGUMENTS="--defaults-file=$MYSQL_CONFIG_FILE"
 fi
 
 
@@ -235,7 +276,7 @@ fi
 
 # Query the database
 RESULTFILE="$TEMPORARY_DIR/myrex.$MONITOR_ID.new"
-mysql -D $MYSQL_DATABASE -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_OPTION_RAW < $SQL_FILE > $RESULTFILE
+mysql $MYSQL_CMD_ARGUMENTS -D $MYSQL_DATABASE -u $MYSQL_USER $MYSQL_OPTION_RAW < $SQL_FILE > $RESULTFILE
 
 # If the query returned a result
 if [ -s $RESULTFILE ]
@@ -271,4 +312,6 @@ then
 	mv $RESULTFILE $OLD_RESULTFILE
 fi
 
-# vim: set tw=72
+exit 0
+
+# vim: textwidth=72
