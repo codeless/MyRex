@@ -12,5 +12,8 @@ mysql -u root -proot < example.install.sql
 # Example call of myrex.sh, with password inside protected file:
 ../myrex.sh -a mail@domain.com -D myrex_example -u root -d ~/.my.personal.cnf -r example
 
+# Example call of myrex.sh, with HTML output:
+../myrex.sh -a mail@domain.com -f example_html.sql -D myrex_example -u root -p root -H example
+
 # Remove database:
 mysql -u root -proot -e "DROP DATABASE myrex_example;"
