@@ -5,7 +5,7 @@
 # Author: Manuel Hiptmair
 # Created in: April - May 2012
 
-PROGRAM_VERSION="0.92"
+PROGRAM_VERSION="0.94"
 PROGRAM_DESCRIPTION="
 NAME
 
@@ -85,6 +85,14 @@ OPTIONS
 		into the MySQL output.
 		Default: disabled
 
+	-H
+
+		Enables the HTML-output option for the MySQL client
+		(see --html or -H in the MySQL documentation).
+		The mail processor (mailx) will automatically
+		add the needed header-tags for MIME-mails.
+		Default: disabled
+
 	-h
 
 		Displays this helpfile.
@@ -150,13 +158,14 @@ MYSQL_USER= 		# -u
 MYSQL_PASSWORD= 	# -p
 MYSQL_CONFIG_FILE= 	# -d
 MYSQL_OPTION_RAW= 	# -r
+MYSQL_HTML_OUTPUT=	# -H
 MYSQL_CMD_ARGUMENTS=
 MONITOR_ID=
 TEMPORARY_DIR=$TMPDIR
 
 
 # Query commandline arguments:
-while getopts f:s:a:e:D:d:u:p:c:r opt
+while getopts f:s:a:e:D:d:u:p:c:rH opt
 do
 	case "$opt" in
 		f) 	SQL_FILE="$OPTARG";;
@@ -169,6 +178,7 @@ do
 		u) 	MYSQL_USER="$OPTARG";;
 		p) 	MYSQL_PASSWORD="$OPTARG";;
 		r) 	MYSQL_OPTION_RAW="--raw";;
+		H) 	MYSQL_HTML_OUTPUT="--html";;
 		h) 	usage;;
 		\?) 	usage;;
 	esac
@@ -276,7 +286,11 @@ fi
 
 # Query the database
 RESULTFILE="$TEMPORARY_DIR/myrex.$MONITOR_ID.new"
-mysql $MYSQL_CMD_ARGUMENTS -D $MYSQL_DATABASE -u $MYSQL_USER $MYSQL_OPTION_RAW < $SQL_FILE > $RESULTFILE
+mysql	$MYSQL_CMD_ARGUMENTS	\
+	-D $MYSQL_DATABASE	\
+	-u $MYSQL_USER		\
+	$MYSQL_HTML_OUTPUT	\
+	$MYSQL_OPTION_RAW < $SQL_FILE > $RESULTFILE
 
 # If the query returned a result
 if [ -s $RESULTFILE ]
