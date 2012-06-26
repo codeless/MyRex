@@ -1,3 +1,5 @@
+# Example of a MySQL configuration file
+
 [client]
 user=root
 password=root
