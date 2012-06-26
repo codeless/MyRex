@@ -3,9 +3,9 @@
 # MySQL Record Monitor
 #
 # Author: Manuel Hiptmair
-# Created in: April - May 2012
+# Created in: April 2012
 
-PROGRAM_VERSION="0.94"
+PROGRAM_VERSION="0.96"
 PROGRAM_DESCRIPTION="
 NAME
 
@@ -93,6 +93,19 @@ OPTIONS
 		add the needed header-tags for MIME-mails.
 		Default: disabled
 
+	-S
+
+		If flag is given, sendmail is used instead of mailx.
+		Using sendmail is recommended when sending HTML mails.
+		sendmail is run via the command:
+
+			sendmail -t < message_file
+
+		No additional parameters are possible yet, so the 
+		mail receiver, sender, subject, asf. have to get
+		included in your message file.
+		Default: disabled
+
 	-h
 
 		Displays this helpfile.
@@ -130,7 +143,8 @@ BUGS
 
 AUTHOR
 
-	MyRex was written by Manuel Hiptmair in April - May 2012.
+	MyRex was written by Manuel Hiptmair in April 2012
+	and is actively maintained.
 
 "
 
@@ -159,13 +173,14 @@ MYSQL_PASSWORD= 	# -p
 MYSQL_CONFIG_FILE= 	# -d
 MYSQL_OPTION_RAW= 	# -r
 MYSQL_HTML_OUTPUT=	# -H
+USE_SENDMAIL=false	# -S
 MYSQL_CMD_ARGUMENTS=
 MONITOR_ID=
 TEMPORARY_DIR=$TMPDIR
 
 
 # Query commandline arguments:
-while getopts f:s:a:e:D:d:u:p:c:rH opt
+while getopts f:s:a:e:D:d:u:p:c:rHS opt
 do
 	case "$opt" in
 		f) 	SQL_FILE="$OPTARG";;
@@ -179,6 +194,7 @@ do
 		p) 	MYSQL_PASSWORD="$OPTARG";;
 		r) 	MYSQL_OPTION_RAW="--raw";;
 		H) 	MYSQL_HTML_OUTPUT="--html";;
+		S)	USE_SENDMAIL=true;;
 		h) 	usage;;
 		\?) 	usage;;
 	esac
@@ -199,7 +215,10 @@ fi
 # E-Mail receiver given?
 if [ "$EMAIL_TO" = "" ]
 then
-	quit "No email receiver passed"
+	if ! $USE_SENDMAIL
+	then
+		quit "No email receiver passed"
+	fi
 fi
 
 # MySQL database given?
@@ -314,8 +333,14 @@ then
 			MYREX_MESSAGE="$TEMPORARY_DIR/myrex.$MONITOR_ID.msg"
 			sed -e "/%MYREX_LISTING%/ r $RESULTFILE" < $EMAIL_FILE | sed -e "s/%MYREX_LISTING%//" > $MYREX_MESSAGE
 
-			# Send message
-			mailx -s "$EMAIL_SUBJECT" -c "$EMAIL_CC" $EMAIL_TO < $MYREX_MESSAGE
+			# Send message via sendmail
+			if $USE_SENDMAIL
+			then
+				/usr/sbin/sendmail -t < $MYREX_MESSAGE
+			else
+				/usr/bin/mailx -s "$EMAIL_SUBJECT" -c "$EMAIL_CC" $EMAIL_TO < $MYREX_MESSAGE
+			fi
+			# or via mailx:
 		fi
 
 		# Delete old-file

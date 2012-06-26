@@ -12,6 +12,7 @@ Please see myrex.sh and the accompanied example for a detailed description.
 
 # Ideas for improvement
 
+  - Add the possibility for more variables inside the message files (i.e. %MYREX_SUBJECT%, %MYREX_TO%, %MYREX_CC%, asf.)
   - Different return values on error, see [Advanced Bash Scripting Guide](http://tldp.org/LDP/abs/html/exitcodes.html)
 
 
