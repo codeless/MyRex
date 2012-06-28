@@ -22,6 +22,9 @@ do
 	# Example call of myrex.sh, with HTML output and triggering sendmail:
 	../myrex.sh -S -f example2.sql -D myrex_example -u root -p root -H example2
 
+	# Example call of myrex.sh, with HTML output as UTF-8 and triggering sendmail:
+	../myrex.sh -S -f example3.sql -D myrex_example -u root -p root -H -C utf8 example3
+
 	# Update database:
 	mysql -u root -proot -D myrex_example < examples.update.sql
 done

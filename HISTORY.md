@@ -1,3 +1,7 @@
+0.97, released on 2012-06-28:
+
+  - Added the possibility to choose the charset to use for the MySQL connection (-C option)
+
 0.96, released on 2012-06-26:
 
   - Using absolute path to mailx now: /usr/bin/mailx
